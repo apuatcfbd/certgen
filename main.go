@@ -236,13 +236,14 @@ func issueCertificateUsingCA(ca *x509.Certificate, caPrivKey *rsa.PrivateKey) {
 			StreetAddress: []string{"Golden Gate Bridge"},
 			PostalCode:    []string{"94016"},
 		},
+		DNSNames: []string{"printer.pp.com"},
 		IPAddresses: []net.IP{
 			net.IPv4(192, 168, 0, 121),
 			net.IPv4(127, 0, 0, 1),
 			net.IPv6loopback,
 		},
 		NotBefore:    time.Now(),
-		NotAfter:     time.Now().AddDate(10, 0, 0),
+		NotAfter:     time.Now().AddDate(2, 0, 0),
 		SubjectKeyId: []byte{1, 2, 3, 4, 6},
 		ExtKeyUsage: []x509.ExtKeyUsage{
 			x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth,
