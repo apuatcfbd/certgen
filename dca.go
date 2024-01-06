@@ -13,27 +13,34 @@ import (
 	"time"
 )
 
-func genCert(template, parent *x509.Certificate, publicKey *rsa.PublicKey, privateKey *rsa.PrivateKey) (*x509.Certificate, []byte) {
+// genCert returns (Certificate, )
+func genCert(
+	template,
+	parent *x509.Certificate,
+	publicKey *rsa.PublicKey,
+	privateKey *rsa.PrivateKey,
+) (cert *x509.Certificate, certPEM []byte) {
 	certBytes, err := x509.CreateCertificate(rand.Reader, template, parent, publicKey, privateKey)
 	if err != nil {
 		panic("Failed to create certificate:" + err.Error())
 	}
 
-	cert, err := x509.ParseCertificate(certBytes)
+	cert, err = x509.ParseCertificate(certBytes)
 	if err != nil {
 		panic("Failed to parse certificate:" + err.Error())
 	}
 
 	b := pem.Block{Type: "CERTIFICATE", Bytes: certBytes}
-	certPEM := pem.EncodeToMemory(&b)
+	certPEM = pem.EncodeToMemory(&b)
 
 	return cert, certPEM
 }
 
 func GenCARoot() (*x509.Certificate, []byte, *rsa.PrivateKey) {
-	if _, err := os.Stat("someFile"); err == nil {
+	if _, err := os.Stat("certs/someFile.pem"); err == nil {
 		//read PEM and cert from file
 	}
+
 	var rootTemplate = x509.Certificate{
 		SerialNumber: big.NewInt(1),
 		Subject: pkix.Name{

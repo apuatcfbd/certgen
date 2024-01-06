@@ -13,11 +13,19 @@ import (
 	"time"
 )
 
-func main() {
-	caCertPath := "./CAcert.pem"
-	caKeyPath := "./CAkey.pem"
+const (
+	pemCertType       = "CERTIFICATE"
+	pemPrivateKeyType = "RSA PRIVATE KEY"
+	pemPublicKeyType  = "RSA PUBLIC KEY"
+)
 
-	//makeCA(caCertPath, caKeyPath)
+var certPath = "./certs/"
+
+func main() {
+	caCertPath := certPath + "CAcert.pem"
+	caKeyPath := certPath + "CAkey.pem"
+
+	makeCA(caCertPath, caKeyPath)
 
 	caCert, caKey := parseCA(caCertPath, caKeyPath)
 
@@ -57,21 +65,13 @@ func makeCA(caCertPath string, caKeyPath string) {
 
 	// pem encode
 	caPEM := pem.EncodeToMemory(&pem.Block{
-		Type:  "CERTIFICATE",
+		Type:  pemCertType,
 		Bytes: caBytes,
 	})
 	writeToFile(caCertPath, caPEM, 0644)
 
-	// encrypt
-	encryptedCAPrivPemBytes, encErr := rsa.EncryptPKCS1v15(
-		rand.Reader,
-		&caPrivKey.PublicKey,
-		[]byte("1234"),
-	)
-	failIfErr(encErr, "Key encryption failed")
-
 	caPrivKeyPEM := pem.EncodeToMemory(&pem.Block{
-		Type:  "RSA PRIVATE KEY",
+		Type:  pemPrivateKeyType,
 		Bytes: x509.MarshalPKCS1PrivateKey(caPrivKey),
 	})
 	writeToFile(caKeyPath, caPrivKeyPEM, 0600)
@@ -110,22 +110,22 @@ func issueCertificateUsingCA(ca *x509.Certificate, caPrivKey *rsa.PrivateKey) {
 	failIfErr(err, "")
 
 	certPEM := pem.EncodeToMemory(&pem.Block{
-		Type:  "CERTIFICATE",
+		Type:  pemCertType,
 		Bytes: certBytes,
 	})
-	writeToFile("./cert.pem", certPEM, 0644)
+	writeToFile(certPath+"cert.pem", certPEM, 0644)
 
 	certPrivKeyPEM := pem.EncodeToMemory(&pem.Block{
-		Type:  "RSA PRIVATE KEY",
+		Type:  pemPrivateKeyType,
 		Bytes: x509.MarshalPKCS1PrivateKey(certPrivKey),
 	})
-	writeToFile("./key.pem", certPrivKeyPEM, 0600)
+	writeToFile(certPath+"key.pem", certPrivKeyPEM, 0600)
 }
 
 func parseCA(certPath string, keyPath string) (ca *x509.Certificate, caPrivKey *rsa.PrivateKey) {
 	certBytes := readFromFile(certPath)
 	certBlock, _ := pem.Decode(certBytes)
-	if certBlock == nil || certBlock.Type != "CERTIFICATE" {
+	if certBlock == nil || certBlock.Type != pemCertType {
 		log.Fatalln("failed to decode PEM block containing certificate")
 	}
 	cert, err := x509.ParseCertificate(certBlock.Bytes)
@@ -133,7 +133,7 @@ func parseCA(certPath string, keyPath string) (ca *x509.Certificate, caPrivKey *
 
 	keyBytes := readFromFile(keyPath)
 	keyBlock, _ := pem.Decode(keyBytes)
-	if keyBlock == nil || keyBlock.Type != "RSA PRIVATE KEY" {
+	if keyBlock == nil || keyBlock.Type != pemPrivateKeyType {
 		log.Fatalln("failed to decode PEM block containing private key")
 	}
 	key, err := x509.ParsePKCS1PrivateKey(keyBlock.Bytes)
