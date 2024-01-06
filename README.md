@@ -4,12 +4,12 @@ This generates a private CA. Using that it issues certificate to DNS & IP Addres
 So using the same CA one can issue many certificate for different websites/ web services.
 
 # Why
-To avoid complex process of generations self-signed certificate that works on modern devices.
-For many people this is bit confusing and sometimes hard to do. 
+To avoid complex process of generating self-signed certificate that works on modern devices.
+For many people this is a bit confusing and sometimes hard to do. 
 This will help generate the certificate & CA in very easy way.
 
 # Use-case
-This can be useful in some cases where SSL is necessary but is not (easyly) possible to use a real SSL certificate or 
+This can be useful in some cases where SSL is necessary but is not (easily) possible to use a real SSL certificate or 
 just don't want purchase a real certificate. In out case - <br />
 We've some applications which want to print from web to users local printer.
 Their printer is available in their local network & open for everybody in the network.
