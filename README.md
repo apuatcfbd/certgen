@@ -10,7 +10,7 @@ This will help generate the certificate & CA in very easy way.
 
 # Use-case
 This can be useful in some cases where SSL is necessary but is not (easily) possible to use a real SSL certificate or 
-just don't want purchase a real certificate. In out case - <br />
+just don't want purchase a real certificate. In our case - <br />
 We've some applications which want to print from web to users local printer.
 Their printer is available in their local network & open for everybody in the network.
 As our site is using SSL but users local network printers aren't. This is a problem,
