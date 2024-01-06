@@ -10,7 +10,7 @@ import (
 	"errors"
 )
 
-func keyGenerate() (key *rsa.PrivateKey, err error) {
+func keyGen() (key *rsa.PrivateKey, err error) {
 	priKey, keyErr := rsa.GenerateKey(rand.Reader, keyBits)
 	if keyErr != nil {
 		return nil, keyErr
