@@ -34,12 +34,12 @@ func keyGetFromFile(path string) (key *rsa.PrivateKey, err error) {
 	keyBytes := readFromFile(path)
 	keyBlock, _ := pem.Decode(keyBytes)
 	if keyBlock == nil || keyBlock.Type != pemPrivateKeyType {
-		return nil, errors.New("failed to decode PEM block containing private key")
+		return nil, errors.New("failed to decode PEM block containing private key from " + path)
 	}
 
 	key, keyParseErr := x509.ParsePKCS1PrivateKey(keyBlock.Bytes)
 	if keyParseErr != nil {
-		return nil, errors.New("failed to parse private key")
+		return nil, errors.New("failed to parse private key from " + path)
 	}
 
 	return key, nil
