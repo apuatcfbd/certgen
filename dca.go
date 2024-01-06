@@ -99,14 +99,20 @@ func GenServerCert(DCACert *x509.Certificate, DCAKey *rsa.PrivateKey) (*x509.Cer
 	}
 
 	var ServerTemplate = x509.Certificate{
-		SerialNumber:   big.NewInt(1),
-		NotBefore:      time.Now().Add(-10 * time.Second),
-		NotAfter:       time.Now().AddDate(10, 0, 0),
-		KeyUsage:       x509.KeyUsageCRLSign,
-		ExtKeyUsage:    []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		SerialNumber: big.NewInt(1),
+		NotBefore:    time.Now().Add(-10 * time.Second),
+		NotAfter:     time.Now().AddDate(10, 0, 0),
+		KeyUsage:     x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature | x509.KeyUsageDataEncipherment,
+		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		Subject: pkix.Name{
+			Country:      []string{"SE"},
+			Organization: []string{"Company Co."},
+			CommonName:   "prnt.dgt.com",
+		},
 		IsCA:           false,
 		MaxPathLenZero: true,
-		IPAddresses:    []net.IP{net.ParseIP("127.0.0.1")},
+		DNSNames:       []string{"prnt.dgt.com"},
+		IPAddresses:    []net.IP{net.ParseIP("192.168.0.121")},
 	}
 
 	ServerCert, ServerPEM := genCert(&ServerTemplate, DCACert, &priv.PublicKey, DCAKey)
@@ -114,17 +120,20 @@ func GenServerCert(DCACert *x509.Certificate, DCAKey *rsa.PrivateKey) (*x509.Cer
 
 }
 
-func main() {
+func dcaMain() {
 	rootCert, rootCertPEM, rootKey := GenCARoot()
 	fmt.Println("rootCert\n", string(rootCertPEM))
+	writeToFile(certPath+"g-CA.pem", rootCertPEM, 0644)
 
 	DCACert, DCACertPEM, DCAKey := GenDCA(rootCert, rootKey)
 	fmt.Println("DCACert\n", string(DCACertPEM))
 	verifyDCA(rootCert, DCACert)
+	writeToFile(certPath+"g-DCA.pem", DCACertPEM, 0644)
 
 	ServerCert, ServerPEM, _ := GenServerCert(DCACert, DCAKey)
 	fmt.Println("ServerPEM\n", string(ServerPEM))
 	verifyLow(rootCert, DCACert, ServerCert)
+	writeToFile(certPath+"g-Server.pem", ServerPEM, 0644)
 }
 
 func verifyDCA(root, dca *x509.Certificate) {

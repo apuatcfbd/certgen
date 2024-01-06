@@ -1,65 +1,59 @@
 package main
 
 import (
-	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
+	"errors"
 )
 
-func privateKeyToEncryptedPEM(bits int, pwd string) []byte {
-	// Generate the key of length bits
-	key, err := rsa.GenerateKey(rand.Reader, bits)
-	failIfErr(err, "PrivateKey Generation Failed")
-
-	keyPub := &key.PublicKey
-
-	// Convert it to pem
-	block := &pem.Block{
-		Type:  "RSA PRIVATE KEY",
-		Bytes: x509.MarshalPKCS1PrivateKey(key),
+func keyGenerate() (key *rsa.PrivateKey, err error) {
+	priKey, keyErr := rsa.GenerateKey(rand.Reader, keyBits)
+	if keyErr != nil {
+		return nil, keyErr
 	}
 
-	// Encrypt the pem
-	if pwd != "" {
+	return priKey, nil
+}
 
-		encryptedBytes, encErr := rsa.EncryptPKCS1v15(
-			rand.Reader,
-			keyPub,
-			[]byte(pwd),
-		)
-		failIfErr(encErr, "Key encryption failed")
-
-		block, err = x509.EncryptPEMBlock(rand.Reader, block.Type, block.Bytes, []byte(pwd), x509.PEMCipherAES256)
-		if err != nil {
-			return nil, err
-		}
+func keySaveToFile(k *rsa.PrivateKey, path string) error {
+	keyPem := &pem.Block{
+		Type:  pemPrivateKeyType,
+		Bytes: x509.MarshalPKCS1PrivateKey(k),
 	}
 
-	return pem.EncodeToMemory(block), nil
+	certPrivKeyPEM := pem.EncodeToMemory(keyPem)
+	writeToFile(path, certPrivKeyPEM, 0600)
+	return nil
 }
 
-func encryptKey(key *rsa.PublicKey, pwd string) []byte {
-	encryptedBytes, encErr := rsa.EncryptOAEP(
-		sha256.New(),
-		rand.Reader,
-		key,
-		[]byte(pwd),
-		nil,
-	)
-	failIfErr(encErr, "Key encryption failed")
+func keyGetFromFile(path string) (key *rsa.PrivateKey, err error) {
+	keyBytes := readFromFile(path)
+	keyBlock, _ := pem.Decode(keyBytes)
+	if keyBlock == nil || keyBlock.Type != pemPrivateKeyType {
+		return nil, errors.New("failed to decode PEM block containing private key")
+	}
 
-	return encryptedBytes
+	key, keyParseErr := x509.ParsePKCS1PrivateKey(keyBlock.Bytes)
+	if keyParseErr != nil {
+		return nil, errors.New("failed to parse private key")
+	}
+
+	return key, nil
 }
 
-func decryptKey(priKey *rsa.PrivateKey, encrypted []byte) []byte {
-	decryptedBytes, err := priKey.Decrypt(
-		nil,
-		encrypted,
-		&rsa.OAEPOptions{Hash: crypto.SHA256},
-	)
-	failIfErr(err, "Key decryption failed")
-	return decryptedBytes
+func keyGetSum(k *rsa.PrivateKey) string {
+	keyPem := &pem.Block{
+		Type:  pemPrivateKeyType,
+		Bytes: x509.MarshalPKCS1PrivateKey(k),
+	}
+
+	h := sha256.New()
+	pemB := pem.EncodeToMemory(keyPem)
+	h.Write(pemB)
+
+	return base64.URLEncoding.EncodeToString(h.Sum(nil))
 }
