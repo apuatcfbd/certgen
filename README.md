@@ -18,7 +18,7 @@ By default browsers intercept connecting to insecure endpoints from secure sites
 Our goal -<br />
 Issue a certificate from our Local CA to some of our customers.
 Then they can install that certificate in the printer & also install the root certificate (not the CA cert)
-in their device (in which they use our web application). So our application cna securely connect with their printer &
+in their device (in which they use our web application). So our application can securely connect with their printer &
 do the printing. <br />
 Obviously for the printing to happen there's lot more needed but those are out of this project's context.
 
