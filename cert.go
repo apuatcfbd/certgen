@@ -109,14 +109,14 @@ func certGenServer(
 			Locality:     []string{"London"},
 			//StreetAddress: []string{"Golden Gate Bridge"},
 			//PostalCode:    []string{"94016"},
-			CommonName: "printer.pp.com",
+			CommonName: "printer.ppx.com",
 		},
-		DNSNames:       []string{"printer.pp.com"},
-		IPAddresses:    []net.IP{net.ParseIP("192.168.0.121")},
-		IsCA:           false,
-		NotBefore:      time.Now(),
-		NotAfter:       time.Now().AddDate(5, 0, 0),
-		SubjectKeyId:   ca.SubjectKeyId,
+		DNSNames:    []string{"printer.ppx.com"},
+		IPAddresses: []net.IP{net.ParseIP("192.168.0.121")},
+		IsCA:        false,
+		NotBefore:   time.Now(),
+		NotAfter:    time.Now().AddDate(5, 0, 0),
+		//SubjectKeyId:   ca.SubjectKeyId,
 		AuthorityKeyId: ca.AuthorityKeyId,
 		KeyUsage:       x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment | x509.KeyUsageDataEncipherment | x509.KeyUsageContentCommitment,
 		ExtKeyUsage: []x509.ExtKeyUsage{
@@ -142,12 +142,11 @@ func certGenServer(
 func certPKCS12Encode(
 	cert *x509.Certificate,
 	certKey *rsa.PrivateKey,
-	caCert *x509.Certificate,
 	password string,
 ) (pfxBytes []byte, err error) {
-	//pfxBytes, err := pkcs12.Encode(rand.Reader, certKey, cert, []*x509.Certificate{caCert}, password)
-	//pfxBytes, err := pkcs12.LegacyRC2.Encode(certKey, cert, []*x509.Certificate{caCert}, password)
-	pfxBytes, err = pkcs12.Modern.WithRand(rand.Reader).Encode(certKey, cert, []*x509.Certificate{caCert}, password)
+	//pfxBytes, err := pkcs12.Encode(rand.Reader, certKey, cert, []*x509.Certificate{}, password)
+	//pfxBytes, err := pkcs12.LegacyRC2.Encode(certKey, cert, []*x509.Certificate{}, password)
+	pfxBytes, err = pkcs12.Modern.WithRand(rand.Reader).Encode(certKey, cert, nil, password)
 	if err != nil {
 		return nil, err
 	}
@@ -155,12 +154,12 @@ func certPKCS12Encode(
 }
 
 // pfxCert must be DER encoded
-func certPKCS12Decode(pfxCert []byte, password string) (pKey interface{}, cert *x509.Certificate, caCerts []*x509.Certificate, err error) {
-	pKey, cert, caCerts, err = pkcs12.DecodeChain(pfxCert, password)
+func certPKCS12Decode(pfxCert []byte, password string) (pKey interface{}, cert *x509.Certificate, err error) {
+	pKey, cert, err = pkcs12.Decode(pfxCert, password)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
-	return pKey, cert, caCerts, nil
+	return pKey, cert, nil
 }
 
 func parseCA2(certPath string, keyPath string) (ca *x509.Certificate, caPrivKey *rsa.PrivateKey) {

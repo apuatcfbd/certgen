@@ -37,7 +37,7 @@ func main() {
 	failIfErr(serverCertSaveErr, "")
 
 	// gen server pfx
-	pfxBytes, serverPfxSaveErr := certPKCS12Encode(serverCert, serverKey, caCert, "1234")
+	pfxBytes, serverPfxSaveErr := certPKCS12Encode(serverCert, serverKey, "1234")
 	failIfErr(serverPfxSaveErr, "")
 	writeToFile(certPath+"server_cert.pfx", pfxBytes, 0600)
 
