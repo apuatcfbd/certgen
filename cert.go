@@ -38,12 +38,18 @@ func certGenCA(caKey *rsa.PrivateKey) (cert *x509.Certificate, certBytes []byte,
 		NotBefore: time.Now(),
 		NotAfter:  time.Now().AddDate(5, 0, 0),
 		IsCA:      true,
-		//ExtKeyUsage: []x509.ExtKeyUsage{
-		//	x509.ExtKeyUsageClientAuth,
-		//	x509.ExtKeyUsageServerAuth,
-		//},
-		//KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
+		KeyUsage:  x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
+		ExtKeyUsage: []x509.ExtKeyUsage{
+			x509.ExtKeyUsageClientAuth,
+			x509.ExtKeyUsageServerAuth,
+		},
 		BasicConstraintsValid: true,
+		//DNSNames:              []string{"printer.pp.com"},
+		//IPAddresses: []net.IP{
+		//	net.IPv4(192, 168, 0, 121),
+		//	//net.IPv4(127, 0, 0, 1),
+		//	//net.IPv6loopback,
+		//},
 	}
 
 	// create the CA
@@ -96,7 +102,7 @@ func certGenServer(
 	serverKey *rsa.PrivateKey,
 ) (serverCert *x509.Certificate, serverCertBytes []byte, err error) {
 	cert := &x509.Certificate{
-		SerialNumber: big.NewInt(2019),
+		SerialNumber: big.NewInt(2020),
 		PublicKey:    serverKey.PublicKey,
 		Subject: pkix.Name{
 			Organization: []string{"Snebtaf"},
@@ -113,12 +119,12 @@ func certGenServer(
 			//net.IPv4(127, 0, 0, 1),
 			//net.IPv6loopback,
 		},
-		IsCA:           false,
-		NotBefore:      time.Now(),
-		NotAfter:       time.Now().AddDate(2, 0, 0),
-		SubjectKeyId:   ca.SubjectKeyId,
-		AuthorityKeyId: ca.AuthorityKeyId,
-		KeyUsage:       x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment | x509.KeyUsageDataEncipherment,
+		IsCA:      false,
+		NotBefore: time.Now(),
+		NotAfter:  time.Now().AddDate(2, 0, 0),
+		//SubjectKeyId:   ca.SubjectKeyId,
+		//AuthorityKeyId: ca.AuthorityKeyId,
+		KeyUsage: x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment | x509.KeyUsageDataEncipherment | x509.KeyUsageContentCommitment,
 		ExtKeyUsage: []x509.ExtKeyUsage{
 			x509.ExtKeyUsageClientAuth,
 			x509.ExtKeyUsageServerAuth,
