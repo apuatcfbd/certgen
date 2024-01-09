@@ -20,7 +20,7 @@ func main() {
 	// get CA Root cert
 	caCert, caCertBytes, caCertGenErr := certGenCA(caKey)
 	failIfErr(caCertGenErr, "")
-	caCertSaveErr := certSaveToFile(caCertBytes, certPath+"ca_cert.pem")
+	caCertSaveErr := certSaveToFile(caCertBytes, certPath+"ca_cert")
 	failIfErr(caCertSaveErr, "")
 
 	// issue server cert using CA
@@ -31,10 +31,15 @@ func main() {
 	failIfErr(serverKeySaveErr, "")
 
 	// gen server cert
-	_, serverCertBytes, serverCertGenErr := certGenServer(caCert, caKey, serverKey)
+	serverCert, serverCertBytes, serverCertGenErr := certGenServer(caCert, caKey, serverKey)
 	failIfErr(serverCertGenErr, "")
-	serverCertSaveErr := certSaveToFile(serverCertBytes, certPath+"server_cert.pem")
+	serverCertSaveErr := certSaveToFile(serverCertBytes, certPath+"server_cert")
 	failIfErr(serverCertSaveErr, "")
+
+	// gen server pfx
+	pfxBytes, serverPfxSaveErr := certPKCS12Encode(serverCert, serverKey, caCert, "1234")
+	failIfErr(serverPfxSaveErr, "")
+	writeToFile(certPath+"server_cert.pfx", pfxBytes, 0600)
 
 }
 

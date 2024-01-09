@@ -10,6 +10,7 @@ import (
 	"log"
 	"math/big"
 	"net"
+	"software.sslmate.com/src/go-pkcs12"
 	"time"
 )
 
@@ -26,17 +27,16 @@ func certMain() {
 
 func certGenCA(caKey *rsa.PrivateKey) (cert *x509.Certificate, certBytes []byte, err error) {
 	ca := &x509.Certificate{
-		SerialNumber: big.NewInt(2019),
+		SerialNumber: big.NewInt(2020),
 		Subject: pkix.Name{
-			Organization:  []string{"Company, INC."},
-			Country:       []string{"US"},
-			Province:      []string{""},
-			Locality:      []string{"San Francisco"},
-			StreetAddress: []string{"Golden Gate Bridge"},
-			PostalCode:    []string{"94016"},
+			Organization:  []string{"Snebtaf"},
+			Country:       []string{"UK"},
+			Locality:      []string{"London"},
+			StreetAddress: []string{"Bricklane"},
+			PostalCode:    []string{"E1 6QL"},
 		},
 		NotBefore: time.Now(),
-		NotAfter:  time.Now().AddDate(5, 0, 0),
+		NotAfter:  time.Now().AddDate(10, 0, 0),
 		IsCA:      true,
 		KeyUsage:  x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
 		ExtKeyUsage: []x509.ExtKeyUsage{
@@ -44,12 +44,6 @@ func certGenCA(caKey *rsa.PrivateKey) (cert *x509.Certificate, certBytes []byte,
 			x509.ExtKeyUsageServerAuth,
 		},
 		BasicConstraintsValid: true,
-		//DNSNames:              []string{"printer.pp.com"},
-		//IPAddresses: []net.IP{
-		//	net.IPv4(192, 168, 0, 121),
-		//	//net.IPv4(127, 0, 0, 1),
-		//	//net.IPv6loopback,
-		//},
 	}
 
 	// create the CA
@@ -67,8 +61,13 @@ func certGenCA(caKey *rsa.PrivateKey) (cert *x509.Certificate, certBytes []byte,
 }
 
 func certSaveToFile(certBytes []byte, path string) error {
+	// save DER
+	writeToFile(path+".crt", certBytes, 0600)
+
+	// save PEM
 	certPem := certPemEncode(certBytes)
-	writeToFile(path, certPem, 0600)
+	writeToFile(path+".pem", certPem, 0600)
+
 	return nil
 }
 
@@ -102,29 +101,24 @@ func certGenServer(
 	serverKey *rsa.PrivateKey,
 ) (serverCert *x509.Certificate, serverCertBytes []byte, err error) {
 	cert := &x509.Certificate{
-		SerialNumber: big.NewInt(2020),
+		SerialNumber: big.NewInt(2021),
 		PublicKey:    serverKey.PublicKey,
 		Subject: pkix.Name{
-			Organization: []string{"Snebtaf"},
-			Country:      []string{"BD"},
-			//Province:      []string{""},
-			Locality: []string{"Sylhet"},
+			Organization: []string{"Ordering2online"},
+			Country:      []string{"UK"},
+			Locality:     []string{"London"},
 			//StreetAddress: []string{"Golden Gate Bridge"},
 			//PostalCode:    []string{"94016"},
 			CommonName: "printer.pp.com",
 		},
-		DNSNames: []string{"printer.pp.com"},
-		IPAddresses: []net.IP{
-			net.IPv4(192, 168, 0, 121),
-			//net.IPv4(127, 0, 0, 1),
-			//net.IPv6loopback,
-		},
-		IsCA:      false,
-		NotBefore: time.Now(),
-		NotAfter:  time.Now().AddDate(2, 0, 0),
-		//SubjectKeyId:   ca.SubjectKeyId,
-		//AuthorityKeyId: ca.AuthorityKeyId,
-		KeyUsage: x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment | x509.KeyUsageDataEncipherment | x509.KeyUsageContentCommitment,
+		DNSNames:       []string{"printer.pp.com"},
+		IPAddresses:    []net.IP{net.ParseIP("192.168.0.121")},
+		IsCA:           false,
+		NotBefore:      time.Now(),
+		NotAfter:       time.Now().AddDate(5, 0, 0),
+		SubjectKeyId:   ca.SubjectKeyId,
+		AuthorityKeyId: ca.AuthorityKeyId,
+		KeyUsage:       x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment | x509.KeyUsageDataEncipherment | x509.KeyUsageContentCommitment,
 		ExtKeyUsage: []x509.ExtKeyUsage{
 			x509.ExtKeyUsageClientAuth,
 			x509.ExtKeyUsageServerAuth,
@@ -143,6 +137,30 @@ func certGenServer(
 	}
 
 	return cert, certBytes, nil
+}
+
+func certPKCS12Encode(
+	cert *x509.Certificate,
+	certKey *rsa.PrivateKey,
+	caCert *x509.Certificate,
+	password string,
+) (pfxBytes []byte, err error) {
+	//pfxBytes, err := pkcs12.Encode(rand.Reader, certKey, cert, []*x509.Certificate{caCert}, password)
+	//pfxBytes, err := pkcs12.LegacyRC2.Encode(certKey, cert, []*x509.Certificate{caCert}, password)
+	pfxBytes, err = pkcs12.Modern.WithRand(rand.Reader).Encode(certKey, cert, []*x509.Certificate{caCert}, password)
+	if err != nil {
+		return nil, err
+	}
+	return pfxBytes, nil
+}
+
+// pfxCert must be DER encoded
+func certPKCS12Decode(pfxCert []byte, password string) (pKey interface{}, cert *x509.Certificate, caCerts []*x509.Certificate, err error) {
+	pKey, cert, caCerts, err = pkcs12.DecodeChain(pfxCert, password)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return pKey, cert, caCerts, nil
 }
 
 func parseCA2(certPath string, keyPath string) (ca *x509.Certificate, caPrivKey *rsa.PrivateKey) {

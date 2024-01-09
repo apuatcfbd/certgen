@@ -45,6 +45,7 @@ func keyGetFromFile(path string) (key *rsa.PrivateKey, err error) {
 	return key, nil
 }
 
+// for testing only, it's returns provided key's sha256 sum
 func keyGetSum(k *rsa.PrivateKey) string {
 	keyPem := &pem.Block{
 		Type:  pemPrivateKeyType,
