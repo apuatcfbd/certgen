@@ -14,18 +14,7 @@ import (
 	"time"
 )
 
-func certMain() {
-	caCertPath := certPath + "CAcert.pem"
-	caKeyPath := certPath + "CAkey.pem"
-
-	makeCA(caCertPath, caKeyPath)
-
-	caCert, caKey := parseCA(caCertPath, caKeyPath)
-
-	issueCertificateUsingCA(caCert, caKey)
-}
-
-func certGenCA(caKey *rsa.PrivateKey) (cert *x509.Certificate, certBytes []byte, err error) {
+func certGenCA(caKey *rsa.PrivateKey) (cert *x509.Certificate, err error) {
 	ca := &x509.Certificate{
 		SerialNumber: big.NewInt(2020),
 		Subject: pkix.Name{
@@ -49,23 +38,23 @@ func certGenCA(caKey *rsa.PrivateKey) (cert *x509.Certificate, certBytes []byte,
 	// create the CA
 	caBytes, err := x509.CreateCertificate(rand.Reader, ca, ca, &caKey.PublicKey, caKey)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	cert, parseErr := x509.ParseCertificate(caBytes)
 	if parseErr != nil {
-		return nil, nil, parseErr
+		return nil, parseErr
 	}
 
-	return cert, caBytes, nil
+	return cert, nil
 }
 
-func certSaveToFile(certBytes []byte, path string) error {
+func certSaveToFile(cert *x509.Certificate, path string) error {
 	// save DER
-	writeToFile(path+".crt", certBytes, 0600)
+	writeToFile(path+".crt", cert.Raw, 0600)
 
 	// save PEM
-	certPem := certPemEncode(certBytes)
+	certPem := certPemEncode(cert)
 	writeToFile(path+".pem", certPem, 0600)
 
 	return nil
@@ -86,10 +75,10 @@ func certGetFromFile(path string) (cert *x509.Certificate, err error) {
 	return cert, nil
 }
 
-func certPemEncode(certBytes []byte) (certPem []byte) {
+func certPemEncode(cert *x509.Certificate) (certPem []byte) {
 	pemBlock := &pem.Block{
 		Type:  pemCertType,
-		Bytes: certBytes,
+		Bytes: cert.Raw,
 	}
 	certPem = pem.EncodeToMemory(pemBlock)
 	return certPem
@@ -99,7 +88,7 @@ func certGenServer(
 	ca *x509.Certificate,
 	caKey *rsa.PrivateKey,
 	serverKey *rsa.PrivateKey,
-) (serverCert *x509.Certificate, serverCertBytes []byte, err error) {
+) (serverCert *x509.Certificate, err error) {
 	cert := &x509.Certificate{
 		SerialNumber: big.NewInt(2021),
 		PublicKey:    serverKey.PublicKey,
@@ -128,15 +117,15 @@ func certGenServer(
 
 	certBytes, err := x509.CreateCertificate(rand.Reader, cert, ca, &serverKey.PublicKey, caKey)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	cert, certParseErr := x509.ParseCertificate(certBytes)
 	if certParseErr != nil {
-		return nil, nil, certParseErr
+		return nil, certParseErr
 	}
 
-	return cert, certBytes, nil
+	return cert, nil
 }
 
 func certPKCS12Encode(
