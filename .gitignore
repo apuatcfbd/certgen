@@ -4,3 +4,4 @@ certgen
 /**/*.pem
 /**/*.pfx
 /**/*.csr
+config.yml

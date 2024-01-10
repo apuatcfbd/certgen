@@ -1,6 +1,8 @@
 package main
 
-import "crypto/rsa"
+import (
+	"crypto/rsa"
+)
 
 const (
 	pemTypeCert        = "CERTIFICATE"
@@ -12,6 +14,13 @@ const (
 )
 
 func main() {
+	generateEmptyConfigFile()
+	//c := config{}
+	//c.Parse()
+	//fmt.Printf("Config %#v \n", c)
+}
+
+func genCerts() {
 	// gen CA key
 	caKey := genKey()
 	caKeySaveErr := keySaveToFile(caKey, certPath+"ca_key.pem")
@@ -40,7 +49,6 @@ func main() {
 	pfxBytes, serverPfxSaveErr := certPKCS12Encode(serverCert, serverKey, "1234")
 	failIfErr(serverPfxSaveErr, "")
 	writeToFile(certPath+"server_cert.pfx", pfxBytes, 0600)
-
 }
 
 func genKey() *rsa.PrivateKey {

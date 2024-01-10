@@ -9,7 +9,6 @@ import (
 	"log"
 	"math/big"
 	"net"
-	"os"
 	"time"
 )
 
@@ -132,21 +131,4 @@ func parseCA(certPath string, keyPath string) (ca *x509.Certificate, caPrivKey *
 	failIfErr(err, "CA private key parse error")
 
 	return cert, key
-}
-
-func writeToFile(path string, content []byte, perm os.FileMode) {
-	err := os.WriteFile(path, content, perm)
-	failIfErr(err, "Failed to write "+path)
-}
-
-func readFromFile(path string) []byte {
-	fileBytes, err := os.ReadFile(path)
-	failIfErr(err, "File "+path+" read error: ")
-	return fileBytes
-}
-
-func failIfErr(e error, prependMsg string) {
-	if e != nil {
-		log.Fatalf("%s, Error: %s \n", prependMsg, e.Error())
-	}
 }
