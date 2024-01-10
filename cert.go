@@ -63,7 +63,7 @@ func certSaveToFile(cert *x509.Certificate, path string) error {
 func certGetFromFile(path string) (cert *x509.Certificate, err error) {
 	certPemBytes := readFromFile(path)
 	certBlock, _ := pem.Decode(certPemBytes)
-	if certBlock == nil || certBlock.Type != pemCertType {
+	if certBlock == nil || certBlock.Type != pemTypeCert {
 		return nil, errors.New("failed to decode PEM block containing certificate from " + path)
 	}
 
@@ -77,7 +77,7 @@ func certGetFromFile(path string) (cert *x509.Certificate, err error) {
 
 func certPemEncode(cert *x509.Certificate) (certPem []byte) {
 	pemBlock := &pem.Block{
-		Type:  pemCertType,
+		Type:  pemTypeCert,
 		Bytes: cert.Raw,
 	}
 	certPem = pem.EncodeToMemory(pemBlock)
@@ -154,7 +154,7 @@ func certPKCS12Decode(pfxCert []byte, password string) (pKey interface{}, cert *
 func parseCA2(certPath string, keyPath string) (ca *x509.Certificate, caPrivKey *rsa.PrivateKey) {
 	certBytes := readFromFile(certPath)
 	certBlock, _ := pem.Decode(certBytes)
-	if certBlock == nil || certBlock.Type != pemCertType {
+	if certBlock == nil || certBlock.Type != pemTypeCert {
 		log.Fatalln("failed to decode PEM block containing certificate")
 	}
 	cert, err := x509.ParseCertificate(certBlock.Bytes)
@@ -162,7 +162,7 @@ func parseCA2(certPath string, keyPath string) (ca *x509.Certificate, caPrivKey 
 
 	keyBytes := readFromFile(keyPath)
 	keyBlock, _ := pem.Decode(keyBytes)
-	if keyBlock == nil || keyBlock.Type != pemPrivateKeyType {
+	if keyBlock == nil || keyBlock.Type != pemTypePrivateKey {
 		log.Fatalln("failed to decode PEM block containing private key")
 	}
 	key, err := x509.ParsePKCS1PrivateKey(keyBlock.Bytes)

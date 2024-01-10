@@ -21,7 +21,7 @@ func keyGen() (key *rsa.PrivateKey, err error) {
 
 func keySaveToFile(k *rsa.PrivateKey, path string) error {
 	keyPem := &pem.Block{
-		Type:  pemPrivateKeyType,
+		Type:  pemTypePrivateKey,
 		Bytes: x509.MarshalPKCS1PrivateKey(k),
 	}
 
@@ -33,7 +33,7 @@ func keySaveToFile(k *rsa.PrivateKey, path string) error {
 func keyGetFromFile(path string) (key *rsa.PrivateKey, err error) {
 	keyBytes := readFromFile(path)
 	keyBlock, _ := pem.Decode(keyBytes)
-	if keyBlock == nil || keyBlock.Type != pemPrivateKeyType {
+	if keyBlock == nil || keyBlock.Type != pemTypePrivateKey {
 		return nil, errors.New("failed to decode PEM block containing private key from " + path)
 	}
 
@@ -48,7 +48,7 @@ func keyGetFromFile(path string) (key *rsa.PrivateKey, err error) {
 // for testing only, it's returns provided key's sha256 sum
 func keyGetSum(k *rsa.PrivateKey) string {
 	keyPem := &pem.Block{
-		Type:  pemPrivateKeyType,
+		Type:  pemTypePrivateKey,
 		Bytes: x509.MarshalPKCS1PrivateKey(k),
 	}
 

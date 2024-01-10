@@ -3,12 +3,12 @@ package main
 import "crypto/rsa"
 
 const (
-	pemCertType       = "CERTIFICATE"
-	pemPrivateKeyType = "RSA PRIVATE KEY"
-	pemPublicKeyType  = "RSA PUBLIC KEY"
-	keyBits           = 2048
-	certRequestType   = "CERTIFICATE REQUEST"
-	certPath          = "./certs/"
+	pemTypeCert        = "CERTIFICATE"
+	pemTypePrivateKey  = "RSA PRIVATE KEY"
+	pemTypePublicKey   = "RSA PUBLIC KEY"
+	pemTypeCertRequest = "CERTIFICATE REQUEST"
+	keyBits            = 2048
+	certPath           = "./certs/"
 )
 
 func main() {
