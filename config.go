@@ -19,9 +19,11 @@ type caInfo struct {
 }
 
 type caConfig struct {
-	Key         string `yaml:"privateKeyPath"`
-	Serial      int    `yaml:"serial"`
-	ExpiryYears int    `yaml:"expiryYears"`
+	Key  string `yaml:"privateKeyPath"`
+	Cert string `yaml:"certificatePath"`
+
+	Serial      int `yaml:"serial"`
+	ExpiryYears int `yaml:"expiryYears"`
 	Info        caInfo
 }
 
@@ -35,9 +37,7 @@ type serverInfo struct {
 }
 
 type serverConfig struct {
-	CaCert string `yaml:"caCertificatePath"`
-	CaKey  string `yaml:"caPrivateKeyPath"`
-	Key    string `yaml:"privateKeyPath"`
+	Key string `yaml:"privateKeyPath"`
 
 	Serial      int `yaml:"serial"`
 	ExpiryYears int `yaml:"expiryYears"`
@@ -47,13 +47,25 @@ type serverConfig struct {
 	Password string `yaml:"password"`
 }
 
+type projectInfo struct {
+	Name string
+	Path string
+	// relative path to the files
+	CaKey       string
+	CaCert      string
+	SrvKey      string
+	SrvCertName string
+	SrvCertCrt  string
+	SrvCertPem  string
+	SrvCertPfx  string
+}
+
 type config struct {
 	// will be used as dir & file name
-	ProjectName string `yaml:"projectName"`
-	// generate CA & use that to issue server cert
-	GenCA  bool `yaml:"genCA"`
-	Ca     caConfig
-	Server serverConfig
+	ProjectName string      `yaml:"projectName"`
+	ProjectInfo projectInfo `yaml:"-"`
+	Ca          caConfig
+	Server      serverConfig
 }
 
 func (c *config) Parse() {
@@ -66,6 +78,9 @@ func (c *config) Parse() {
 
 	unmarshalErr := yaml.Unmarshal(fb, c)
 	failIfErr(unmarshalErr)
+
+	// attach generated info
+	c.ProjectInfo = genProjectInfo(c.ProjectName)
 }
 
 func generateEmptyConfigFile() {
@@ -87,9 +102,9 @@ func generateEmptyConfigFile() {
 
 	c := config{
 		ProjectName: "example.com",
-		GenCA:       true,
 		Ca: caConfig{
-			Key: pi.caKey,
+			Key:  pi.CaKey,
+			Cert: pi.CaCert,
 
 			Serial:      2020,
 			ExpiryYears: 10,
@@ -102,9 +117,7 @@ func generateEmptyConfigFile() {
 			},
 		},
 		Server: serverConfig{
-			CaKey:  pi.caKey,
-			CaCert: pi.caCert,
-			Key:    pi.srvKey,
+			Key: pi.SrvKey,
 
 			Serial:      2021,
 			ExpiryYears: 5,

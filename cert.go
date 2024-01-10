@@ -14,18 +14,18 @@ import (
 	"time"
 )
 
-func certGenCA(caKey *rsa.PrivateKey) (cert *x509.Certificate, err error) {
+func certGenCA(caKey *rsa.PrivateKey, cfg *caConfig) (cert *x509.Certificate, err error) {
 	ca := &x509.Certificate{
-		SerialNumber: big.NewInt(2020),
+		SerialNumber: big.NewInt(int64(cfg.Serial)),
 		Subject: pkix.Name{
-			Organization:  []string{"Snebtaf"},
-			Country:       []string{"UK"},
-			Locality:      []string{"London"},
-			StreetAddress: []string{"Bricklane"},
-			PostalCode:    []string{"E1 6QL"},
+			Organization:  []string{cfg.Info.Organization},
+			Country:       []string{cfg.Info.Country},
+			Locality:      []string{cfg.Info.Locality},
+			StreetAddress: []string{cfg.Info.StreetAddress},
+			PostalCode:    []string{cfg.Info.PostalCode},
 		},
 		NotBefore: time.Now(),
-		NotAfter:  time.Now().AddDate(10, 0, 0),
+		NotAfter:  time.Now().AddDate(cfg.ExpiryYears, 0, 0),
 		IsCA:      true,
 		KeyUsage:  x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
 		ExtKeyUsage: []x509.ExtKeyUsage{
@@ -38,15 +38,15 @@ func certGenCA(caKey *rsa.PrivateKey) (cert *x509.Certificate, err error) {
 	// create the CA
 	caBytes, err := x509.CreateCertificate(rand.Reader, ca, ca, &caKey.PublicKey, caKey)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	cert, parseErr := x509.ParseCertificate(caBytes)
 	if parseErr != nil {
-		return nil, parseErr
+		err = parseErr
 	}
 
-	return cert, nil
+	return
 }
 
 func certSaveToFile(cert *x509.Certificate, path string) error {
@@ -88,23 +88,24 @@ func certGenServer(
 	ca *x509.Certificate,
 	caKey *rsa.PrivateKey,
 	serverKey *rsa.PrivateKey,
+	cfg *serverConfig,
 ) (serverCert *x509.Certificate, err error) {
 	cert := &x509.Certificate{
-		SerialNumber: big.NewInt(2021),
+		SerialNumber: big.NewInt(int64(cfg.Serial)),
 		PublicKey:    serverKey.PublicKey,
 		Subject: pkix.Name{
-			Organization: []string{"Ordering2online"},
-			Country:      []string{"UK"},
-			Locality:     []string{"London"},
-			//StreetAddress: []string{"Golden Gate Bridge"},
-			//PostalCode:    []string{"94016"},
-			CommonName: "printer.ppx.com",
+			Organization:  []string{cfg.Info.Organization},
+			Country:       []string{cfg.Info.Country},
+			Locality:      []string{cfg.Info.Locality},
+			StreetAddress: []string{cfg.Info.StreetAddress},
+			PostalCode:    []string{cfg.Info.PostalCode},
+			CommonName:    cfg.Info.CommonName,
 		},
-		DNSNames:    []string{"printer.ppx.com"},
-		IPAddresses: []net.IP{net.ParseIP("192.168.0.121")},
+		DNSNames:    []string{cfg.Info.CommonName},
+		IPAddresses: []net.IP{net.ParseIP(cfg.IpAddress)},
 		IsCA:        false,
 		NotBefore:   time.Now(),
-		NotAfter:    time.Now().AddDate(5, 0, 0),
+		NotAfter:    time.Now().AddDate(cfg.ExpiryYears, 0, 0),
 		//SubjectKeyId:   ca.SubjectKeyId,
 		AuthorityKeyId: ca.AuthorityKeyId,
 		KeyUsage:       x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment | x509.KeyUsageDataEncipherment | x509.KeyUsageContentCommitment,
@@ -117,15 +118,15 @@ func certGenServer(
 
 	certBytes, err := x509.CreateCertificate(rand.Reader, cert, ca, &serverKey.PublicKey, caKey)
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	cert, certParseErr := x509.ParseCertificate(certBytes)
+	serverCert, certParseErr := x509.ParseCertificate(certBytes)
 	if certParseErr != nil {
-		return nil, certParseErr
+		err = certParseErr
 	}
 
-	return cert, nil
+	return
 }
 
 func certPKCS12Encode(

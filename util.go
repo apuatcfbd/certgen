@@ -40,16 +40,6 @@ func readUserInput(msg string) (val string, err error) {
 	return
 }
 
-type projectInfo struct {
-	Name       string
-	caKey      string
-	caCert     string
-	srvKey     string
-	srvCertCrt string
-	srvCertPem string
-	srvCertPfx string
-}
-
 func genProjectInfo(projectName string) projectInfo {
 	info := projectInfo{}
 
@@ -76,13 +66,29 @@ func genProjectInfo(projectName string) projectInfo {
 		cn = strings.ReplaceAll(cn, replace, with)
 	}
 
+	p := fmt.Sprintf("./%s/", cn)
+	srvCertNamePathWithoutExt := p + "_srv_cert"
+
+	//todo: fix path & name gen
+
+	// ex: domain-com
 	info.Name = cn
-	info.caKey = cn + "_ca_key.pem"
-	info.caCert = cn + "_ca_cert.pem"
-	info.srvKey = cn + "_srv_key.pem"
-	info.srvCertCrt = cn + "_srv_cert.crt"
-	info.srvCertPem = cn + "_srv_cert.pem"
-	info.srvCertPfx = cn + "_srv_cert.pfx"
+	// ex: ./domain-com/
+	info.Path = p
+	// ex: ./domain-com/_ca_key.pem
+	info.CaKey = p + "_ca_key.pem"
+	// ex: ./domain-com/_ca_cert.pem
+	info.CaCert = p + "_ca_cert.pem"
+	// ex: ./domain-com/_srv_cert
+	info.SrvCertName = srvCertNamePathWithoutExt
+	// ex: ./domain-com/_srv_key.pem
+	info.SrvKey = p + "_srv_key.pem"
+	// ex: ./domain-com/_srv_cert.crt
+	info.SrvCertCrt = srvCertNamePathWithoutExt + ".crt"
+	// ex: ./domain-com/_srv_cert.pem
+	info.SrvCertPem = srvCertNamePathWithoutExt + ".pem"
+	// ex: ./domain-com/_srv_cert.pfx
+	info.SrvCertPfx = srvCertNamePathWithoutExt + ".pfx"
 
 	return info
 }
