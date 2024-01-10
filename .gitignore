@@ -1,3 +1,6 @@
 .idea/
-certs/
 certgen
+/**/*.crt
+/**/*.pem
+/**/*.pfx
+/**/*.csr
