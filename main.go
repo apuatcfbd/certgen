@@ -55,7 +55,7 @@ func makeCerts(c *config) {
 		}
 	} else {
 		// create project dir
-		er := os.Mkdir(c.ProjectInfo.Path, 0750)
+		er := os.Mkdir(c.ProjectInfo.Path, 0760)
 		failIfErr(er, "Project dir creation err")
 	}
 
