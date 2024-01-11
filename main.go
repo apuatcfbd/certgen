@@ -22,7 +22,7 @@ func main() {
 	input, err := readUserInput(
 		`What to do?
 1. Generate sample config
-2. Generate Key's using config
+2. Generate Keys using config
 `)
 	failIfErr(err, "Failed to read your input")
 
