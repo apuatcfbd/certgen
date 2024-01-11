@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/rsa"
 	"crypto/x509"
+	"os"
 )
 
 const (
@@ -15,53 +16,28 @@ const (
 )
 
 func main() {
-	////generateEmptyConfigFile()
-	//c := config{}
-	//c.Parse()
-	//fmt.Printf("Config %#v \n", c)
+	//generateEmptyConfigFile()
 
-	cfg := config{}
-	cfg.Parse()
+	c := config{}
+	c.Parse()
 
-	makeCerts(&cfg)
+	makeCerts(&c)
 }
 
-func makeCerts(cfg *config) {
+func makeCerts(c *config) {
+
+	// crate directory if not exists
+	if exists, _ := isPathExist(c.ProjectInfo.Path); !exists {
+		er := os.Mkdir(c.ProjectInfo.Path, 0750)
+		failIfErr(er, "Project dir creation err")
+	}
 
 	// get or make CA
-	caKey, caCert := getCA(cfg)
+	caKey, caCert := getCA(c)
 
 	// get server cert
-	srvKey, srvCert := getSrvCert(cfg, caKey, caCert)
+	getSrvCert(c, caKey, caCert)
 
-	//// gen CA key
-	//caKey := genKey()
-	//caKeySaveErr := keySaveToFile(caKey, certPath+"ca_key.pem")
-	//failIfErr(caKeySaveErr, "")
-	//
-	//// get CA Root cert
-	//caCert, caCertGenErr := certGenCA(caKey)
-	//failIfErr(caCertGenErr, "")
-	//caCertSaveErr := certSaveToFile(caCert, certPath+"ca_cert")
-	//failIfErr(caCertSaveErr, "")
-
-	// issue server cert using CA
-
-	// gen server key
-	serverKey := genKey()
-	serverKeySaveErr := keySaveToFile(serverKey, certPath+"server_key.pem")
-	failIfErr(serverKeySaveErr, "")
-
-	// gen server cert
-	serverCert, serverCertGenErr := certGenServer(caCert, caKey, serverKey)
-	failIfErr(serverCertGenErr, "")
-	serverCertSaveErr := certSaveToFile(serverCert, certPath+"server_cert")
-	failIfErr(serverCertSaveErr, "")
-
-	// gen server pfx
-	pfxBytes, serverPfxSaveErr := certPKCS12Encode(serverCert, serverKey, "1234")
-	failIfErr(serverPfxSaveErr, "")
-	writeToFile(certPath+"server_cert.pfx", pfxBytes, 0600)
 }
 
 func getCA(c *config) (*rsa.PrivateKey, *x509.Certificate) {
@@ -87,7 +63,7 @@ func getCA(c *config) (*rsa.PrivateKey, *x509.Certificate) {
 	cert, err := certGenCA(key, &c.Ca)
 	failIfErr(err, "Ca certificate generation err")
 
-	certSaveErr := certSaveToFile(cert, c.ProjectInfo.CaCert)
+	certSaveErr := certSaveToFile(cert, c.ProjectInfo.CaCertName)
 	failIfErr(certSaveErr, "Ca certificate save err")
 
 	return key, cert
@@ -110,7 +86,7 @@ func getSrvCert(c *config, caKey *rsa.PrivateKey, caCert *x509.Certificate) (*rs
 	cert, err := certGenServer(caCert, caKey, key, &c.Server)
 	failIfErr(err, "Server certificate generation err")
 
-	certSaveErr := certSaveToFile(cert, c.ProjectInfo.SrvCertPem)
+	certSaveErr := certSaveToFile(cert, c.ProjectInfo.SrvCertName)
 	failIfErr(certSaveErr, "Server certificate save err")
 
 	// save pfx

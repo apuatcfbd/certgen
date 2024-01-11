@@ -67,28 +67,20 @@ func genProjectInfo(projectName string) projectInfo {
 	}
 
 	p := fmt.Sprintf("./%s/", cn)
-	srvCertNamePathWithoutExt := p + "_srv_cert"
+	caCertNamePathWithoutExt := p + cn + "_ca_cert"
+	srvCertNamePathWithoutExt := p + cn + "_srv_cert"
 
-	//todo: fix path & name gen
-
-	// ex: domain-com
-	info.Name = cn
-	// ex: ./domain-com/
-	info.Path = p
-	// ex: ./domain-com/_ca_key.pem
-	info.CaKey = p + "_ca_key.pem"
-	// ex: ./domain-com/_ca_cert.pem
-	info.CaCert = p + "_ca_cert.pem"
-	// ex: ./domain-com/_srv_cert
-	info.SrvCertName = srvCertNamePathWithoutExt
-	// ex: ./domain-com/_srv_key.pem
-	info.SrvKey = p + "_srv_key.pem"
-	// ex: ./domain-com/_srv_cert.crt
-	info.SrvCertCrt = srvCertNamePathWithoutExt + ".crt"
-	// ex: ./domain-com/_srv_cert.pem
-	info.SrvCertPem = srvCertNamePathWithoutExt + ".pem"
-	// ex: ./domain-com/_srv_cert.pfx
-	info.SrvCertPfx = srvCertNamePathWithoutExt + ".pfx"
+	info.Name = cn                                             // ex: domain-com
+	info.Path = p                                              // ex: ./domain-com/
+	info.CaKey = p + cn + "_ca_key.pem"                        // ex: ./domain-com/_ca_key.pem
+	info.CaCertName = caCertNamePathWithoutExt                 // ex: ./domain-com/_ca_cert
+	info.CaCertDer = caCertNamePathWithoutExt + "_ca_cert.crt" // ex: ./domain-com/_ca_cert.crt
+	info.CaCertPem = caCertNamePathWithoutExt + "_ca_cert.pem" // ex: ./domain-com/_ca_cert.pem
+	info.SrvCertName = srvCertNamePathWithoutExt               // ex: ./domain-com/_srv_cert
+	info.SrvKey = p + cn + "_srv_key.pem"                      // ex: ./domain-com/_srv_key.pem
+	info.SrvCertDer = srvCertNamePathWithoutExt + ".crt"       // ex: ./domain-com/_srv_cert.crt
+	info.SrvCertPem = srvCertNamePathWithoutExt + ".pem"       // ex: ./domain-com/_srv_cert.pem
+	info.SrvCertPfx = srvCertNamePathWithoutExt + ".pfx"       // ex: ./domain-com/_srv_cert.pfx
 
 	return info
 }

@@ -52,10 +52,12 @@ type projectInfo struct {
 	Path string
 	// relative path to the files
 	CaKey       string
-	CaCert      string
+	CaCertName  string
+	CaCertDer   string
+	CaCertPem   string
 	SrvKey      string
 	SrvCertName string
-	SrvCertCrt  string
+	SrvCertDer  string
 	SrvCertPem  string
 	SrvCertPfx  string
 }
@@ -98,13 +100,14 @@ func generateEmptyConfigFile() {
 	}
 
 	// generated project info
-	pi := genProjectInfo("example.com")
+	pn := "example.com"
+	pi := genProjectInfo(pn)
 
 	c := config{
-		ProjectName: "example.com",
+		ProjectName: pn,
 		Ca: caConfig{
 			Key:  pi.CaKey,
-			Cert: pi.CaCert,
+			Cert: pi.CaCertPem,
 
 			Serial:      2020,
 			ExpiryYears: 10,
