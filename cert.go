@@ -88,24 +88,32 @@ func certGenServer(
 	ca *x509.Certificate,
 	caKey *rsa.PrivateKey,
 	serverKey *rsa.PrivateKey,
-	cfg *serverConfig,
+	c *serverConfig,
 ) (serverCert *x509.Certificate, err error) {
+
+	var ips []net.IP
+	for _, ip := range c.IpAddresses {
+		if parsedIp := net.ParseIP(ip); parsedIp != nil {
+			ips = append(ips, parsedIp)
+		}
+	}
+
 	cert := &x509.Certificate{
-		SerialNumber: big.NewInt(int64(cfg.Serial)),
+		SerialNumber: big.NewInt(int64(c.Serial)),
 		PublicKey:    serverKey.PublicKey,
 		Subject: pkix.Name{
-			Organization:  []string{cfg.Info.Organization},
-			Country:       []string{cfg.Info.Country},
-			Locality:      []string{cfg.Info.Locality},
-			StreetAddress: []string{cfg.Info.StreetAddress},
-			PostalCode:    []string{cfg.Info.PostalCode},
-			CommonName:    cfg.Info.CommonName,
+			Organization:  []string{c.Info.Organization},
+			Country:       []string{c.Info.Country},
+			Locality:      []string{c.Info.Locality},
+			StreetAddress: []string{c.Info.StreetAddress},
+			PostalCode:    []string{c.Info.PostalCode},
+			CommonName:    c.Info.CommonNames[0],
 		},
-		DNSNames:    []string{cfg.Info.CommonName},
-		IPAddresses: []net.IP{net.ParseIP(cfg.IpAddress)},
+		DNSNames:    c.Info.CommonNames,
+		IPAddresses: ips,
 		IsCA:        false,
 		NotBefore:   time.Now(),
-		NotAfter:    time.Now().AddDate(cfg.ExpiryYears, 0, 0),
+		NotAfter:    time.Now().AddDate(c.ExpiryYears, 0, 0),
 		//SubjectKeyId:   ca.SubjectKeyId,
 		AuthorityKeyId: ca.AuthorityKeyId,
 		KeyUsage:       x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment | x509.KeyUsageDataEncipherment | x509.KeyUsageContentCommitment,

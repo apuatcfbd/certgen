@@ -28,12 +28,12 @@ type caConfig struct {
 }
 
 type serverInfo struct {
-	Organization  string `yaml:"organization"`
-	Country       string `yaml:"country"`
-	Locality      string `yaml:"city"`
-	StreetAddress string `yaml:"street"`
-	PostalCode    string `yaml:"postalCode"`
-	CommonName    string `yaml:"domainName"`
+	Organization  string   `yaml:"organization"`
+	Country       string   `yaml:"country"`
+	Locality      string   `yaml:"city"`
+	StreetAddress string   `yaml:"street"`
+	PostalCode    string   `yaml:"postalCode"`
+	CommonNames   []string `yaml:"domainNames"`
 }
 
 type serverConfig struct {
@@ -42,7 +42,7 @@ type serverConfig struct {
 	Serial      int `yaml:"serial"`
 	ExpiryYears int `yaml:"expiryYears"`
 	Info        serverInfo
-	IpAddress   string `yaml:"ipAddress"`
+	IpAddresses []string `yaml:"ipAddresses"`
 	// encryption password
 	Password string `yaml:"password"`
 }
@@ -130,10 +130,10 @@ func generateEmptyConfigFile() {
 				Locality:      "Sylhet",
 				StreetAddress: "Ambarkhana",
 				PostalCode:    "1201",
-				CommonName:    "print.digitafact.com",
+				CommonNames:   []string{"print.digitafact.com"},
 			},
-			IpAddress: "192.168.0.121",
-			Password:  "1234",
+			IpAddresses: []string{"192.168.0.121"},
+			Password:    "1234",
 		},
 	}
 

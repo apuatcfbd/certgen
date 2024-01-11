@@ -70,17 +70,17 @@ func genProjectInfo(projectName string) projectInfo {
 	caCertNamePathWithoutExt := p + cn + "_ca_cert"
 	srvCertNamePathWithoutExt := p + cn + "_srv_cert"
 
-	info.Name = cn                                             // ex: domain-com
-	info.Path = p                                              // ex: ./domain-com/
-	info.CaKey = p + cn + "_ca_key.pem"                        // ex: ./domain-com/_ca_key.pem
-	info.CaCertName = caCertNamePathWithoutExt                 // ex: ./domain-com/_ca_cert
-	info.CaCertDer = caCertNamePathWithoutExt + "_ca_cert.crt" // ex: ./domain-com/_ca_cert.crt
-	info.CaCertPem = caCertNamePathWithoutExt + "_ca_cert.pem" // ex: ./domain-com/_ca_cert.pem
-	info.SrvCertName = srvCertNamePathWithoutExt               // ex: ./domain-com/_srv_cert
-	info.SrvKey = p + cn + "_srv_key.pem"                      // ex: ./domain-com/_srv_key.pem
-	info.SrvCertDer = srvCertNamePathWithoutExt + ".crt"       // ex: ./domain-com/_srv_cert.crt
-	info.SrvCertPem = srvCertNamePathWithoutExt + ".pem"       // ex: ./domain-com/_srv_cert.pem
-	info.SrvCertPfx = srvCertNamePathWithoutExt + ".pfx"       // ex: ./domain-com/_srv_cert.pfx
+	info.Name = cn                                       // ex: domain-com
+	info.Path = p                                        // ex: ./domain-com/
+	info.CaKey = p + cn + "_ca_key.pem"                  // ex: ./domain-com/_ca_key.pem
+	info.CaCertName = caCertNamePathWithoutExt           // ex: ./domain-com/_ca_cert
+	info.CaCertDer = caCertNamePathWithoutExt + ".crt"   // ex: ./domain-com/_ca_cert.crt
+	info.CaCertPem = caCertNamePathWithoutExt + ".pem"   // ex: ./domain-com/_ca_cert.pem
+	info.SrvCertName = srvCertNamePathWithoutExt         // ex: ./domain-com/_srv_cert
+	info.SrvKey = p + cn + "_srv_key.pem"                // ex: ./domain-com/_srv_key.pem
+	info.SrvCertDer = srvCertNamePathWithoutExt + ".crt" // ex: ./domain-com/_srv_cert.crt
+	info.SrvCertPem = srvCertNamePathWithoutExt + ".pem" // ex: ./domain-com/_srv_cert.pem
+	info.SrvCertPfx = srvCertNamePathWithoutExt + ".pfx" // ex: ./domain-com/_srv_cert.pfx
 
 	return info
 }
