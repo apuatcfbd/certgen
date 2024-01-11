@@ -36,7 +36,7 @@ func main() {
 		c.Parse()
 		makeCerts(&c)
 	default:
-		log.Println("Incorrect input!")
+		log.Fatalln("Incorrect input!")
 	}
 
 }

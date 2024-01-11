@@ -35,8 +35,11 @@ func isPathExist(p string) (bool, error) {
 func readUserInput(msg string) (val string, err error) {
 	fmt.Print(msg + ": ")
 	r := bufio.NewReader(os.Stdin)
+
 	val, err = r.ReadString('\n')
 	val = strings.Trim(val, "\n")
+	val = strings.Trim(val, "\r")
+	val = strings.Trim(val, " ")
 	return
 }
 
