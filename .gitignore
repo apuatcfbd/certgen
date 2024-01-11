@@ -5,3 +5,4 @@ certgen
 /**/*.pfx
 /**/*.csr
 config.yml
+build/*
